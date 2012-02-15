@@ -1,0 +1,414 @@
+;;-*-Emacs-Lisp-*-
+;;set mac-command-modifer as meta key
+(setq mac-command-modifier 'meta)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;Common settings;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq default-major-mode 'text-mode)
+;; close the startup message
+(setq inhibit-startup-message t)
+;;hide toolbar
+(setq-default tool-bar-mode nil)
+(tool-bar-mode 0)
+
+;; display line number
+(column-number-mode t)
+(line-number-mode t)
+;; display the file name in the window
+(setq frame-title-format "%b - emacs")
+;; do not generate backup files
+;;(setq-default make-backup-files nil)
+;; set emacs so that all backups are directed into one folder
+(defun my-backup-file-name (fpath)
+  (let (backup-root bpath)
+    (setq backup-root "~/.emacs.d/emacs-backup")
+    (setq bpath (concat backup-root fpath "~"))
+    (make-directory (file-name-directory bpath) bpath)
+    bpath
+    )
+  )
+(setq make-backup-file-name-function 'my-backup-file-name)
+;;The above will mirror all directories at the given backup dir.
+;;for example, if you editing a file "/Users/mac/myfile.txt",and your
+;;backup file willl be "~/.emacs.d/emacs-backup/Users/mac/myfile.txt~"
+
+;;Just answer y or n
+(fset 'yes-or-no-p 'y-or-n-p)
+
+
+;;set fill column
+(setq-default fill-column 80)
+;;enable auto fill mode, is useful when editing text files.
+;; lines are automatically wrapped when the cursor goes beyond the column limit
+(setq auto-fill-mode 1)
+
+;;;ido-mode for buffer switching
+(require 'ido)
+(ido-mode t)
+
+;;uniquify support
+(require 'uniquify)
+
+;;global-font-lock-mode
+(global-font-lock-mode t)
+;;How to have a menu of recently opened files
+;;http://xahlee.org/emacs/emacs_make_modern.html
+(recentf-mode 1)
+
+;;enable destop-save-mode
+(desktop-save-mode 1)
+
+;;Have spell-checker turned on
+;; http://xahlee.org/emacs/emacs_adv_tips.html
+;;(add-hook 'text-mode-hook (lambda() (flyspell-mode 1)))
+
+
+;;Disable emacs's automatic backup
+;;http://xahlee.org/emacs/emacs_adv_tips.html
+(setq make-back-files nil)  ; stop creating those backup~ files
+(setq auto-save-default nil) ; stop creating those #auto-save# files
+
+;;customization of UI
+;;http://xahlee.org/emacs/emacs_make_modern.html
+(transient-mark-mode 1) ;highlight text selection
+(delete-selection-mode 1) ; delete selected text when typing
+
+;;highlight current-line
+;;(add-hook 'text-mode-hook (lambda() (hl-line-mode 1)))
+
+
+;; set default frame size
+;;(setq default-frame-alist
+;;      '((height . 25)
+;;	(width . 80)
+;;	(menu-bar-lines . 80)
+;;	(tool-bar-lines . 80)))
+
+
+
+;;;;;Color Theme
+(add-to-list 'load-path
+	     "~/.emacs.d")
+(require 'color-theme)
+;;(color-theme-standard)   ;; the standard theme works well in terminal
+;;(color-theme-dark-laptop) ;; maybe this is also a good theme
+;;(color-theme-tty-dark)  ;; another cool theme
+(color-theme-arjen) ;; yet another cool theme
+;;(color-theme-taylor)
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Programming Support;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;; add Yasnippet support(code.google.com/p/yasnippet)
+(add-to-list 'load-path
+	     "~/.emacs.d/programming")
+(require 'yasnippet-bundle)
+
+;;;;;;;;;;;;;add header2.el support
+;;add fit-frame
+(require 'fit-frame)
+;;(add-hook 'after-make-frame-functions 'fit-frame)
+(require 'header2)
+(setq header-date-format nil
+      make-header-hook
+      '(header-title
+	;;header-brank
+	;;header-file-name
+	;; header-end-line
+	header-copyright
+	header-free-software
+	;; header-rcs-id
+	;; header-rcs-log
+	;; header-end-line
+	header-commentary
+	header-blank
+	;; header-prefix-string
+	;; header-prefix-string
+	;; header-blank
+	header-end-line
+	;; header-end-line
+	header-eof)
+      header-copyright-notice
+      "copyright (c) 2010 dreamway\n "
+      header-free-software
+      "This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by the Free Software Foundation;\n Feel free to contact dreamway(jingwenlai@163.com)\n
+website: cg.xplore.cn")
+(add-hook 'write-file-hooks 'auto-update-file-header)
+(add-hook 'c++-mode-common-hook 'auto-make-header)
+(add-hook 'c-mode-common-hook 'auto-make-header)
+
+
+;;;add Displaying Line Number support
+(require 'display-line-number)
+(setq display-line-number-format "%4d")
+;;usage: M-x display-line-number-mode
+;; auto displaying line number when in c-mode
+(add-hook 'c-mode-hook 'display-line-number-mode)
+(add-hook 'c++-mode-hook 'display-line-number-mode)
+(global-set-key [f7] 'compile)
+(global-set-key [f9] 'eshell)
+
+
+;;;;;cscope support
+(require 'xcscope)
+
+;;;;;;;;;;;;;;;;[======== C Programming Support =============];;;;;;;;;;;;
+;;;;;  Only load extra packages when using enter specific mode
+(require 'google-c-style)
+(add-hook 'c-mode-common-hook 'google-set-c-style)
+(add-hook 'c-mode-common-hook 'google-make-newline-indent)
+(add-hook 'c++-mode-common-hook 'google-set-c-style)
+(add-hook 'c++-mode-common-hook 'google-make-newline-indent)
+
+
+
+
+
+;;;;;;;;;;;;;CEDET settings;;;;;;;;;;;;;;;;;;;;;;;;;
+(load-file "~/.emacs.d/cedet/common/cedet.el")
+(require 'cedet)
+;;(require 'eldoc)
+;;(require 'semantic-gcc)
+
+;;enable EDE(Project management) features
+(global-ede-mode 1)
+
+;;;;;semantic setting
+;;this enables the database and idle reparse engines
+;;(semantic-load-enable-minimum-features)
+;; this enables some tools useful for coding, such as sumary mode
+(semantic-load-enable-code-helpers)
+(global-set-key [(control tab)] 'semantic-ia-complete-symbol-menu)
+;; extra commands: semantor-complete-symbol, senator-completion-menu-popup, semantic-ia-complete-symbol
+
+(setq semanticdb-default-save-directory "~/.emacs.d/sematicdb/")
+
+
+;;work with C++
+(setq qt4-base-dir "/usr/local/Trolltech/Qt-4.6.0/include")
+(semantic-add-system-include qt4-base-dir 'c++-mode)
+
+;; (add-to-list 'auto-mode-alist (cons qt4-base-dir 'c++-mode))
+;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file (concat qt4-base-dir "/Qt/qconfig.h"))
+;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file (concat qt4-base-dir "/Qt/qconfig-dist.h"))
+;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file (concat qt4-base-dir "/Qt/qglobal.h"))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;auto-complete
+(require 'auto-complete)
+(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
+(require 'auto-complete-config)
+(ac-config-default)
+(define-key ac-completing-map "\M-n" 'ac-next)
+(define-key ac-completing-map "\M-p" 'ac-previous)
+(global-auto-complete-mode t)
+
+
+;;;Auto add the right side's backet,eg. ;;()[]{}
+(defun my-c-mode-auto-pair ()
+  (interactive)
+  (make-local-variable 'skeleton-pair-alist)
+  (setq skeleton-pair-alist  '(
+    (?` ?` _ "''")
+    (?\( ?  _ " )")
+    (?\[ ?  _ " ]")
+    (?{ \n > _ \n ?} >)))
+  (setq skeleton-pair t)
+  (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "[") 'skeleton-pair-insert-maybe))
+(add-hook 'c-mode-hook 'my-c-mode-auto-pair)
+(add-hook 'c++-mode-hook 'my-c-mode-auto-pair)
+
+
+;;smart tabs
+(require 'smarttabs)
+
+;;CMake support
+;; add cmake listfile names to the mode list
+(setq auto-mode-alist
+      (append
+       '(("CMakeLists\\.txt\\'" . cmake-mode))
+       '(("\\.cmake\\'" . cmake-mode))
+       auto-mode-alist))
+(autoload 'cmake-mode "~/.emacs.d/cmake-mode.el" t)
+;;add support for uniquify, which can solve multiple CMakeList.txt<*> problem
+(require 'uniquify)
+
+;;doc-mode : 
+;; http://nschum.de/src/emacs/doc-mode/
+;; allows easy creation and editing of Doxygen comment blocks in your code
+(require 'doc-mode)
+(add-hook 'c-mode-common-hook 'doc-mode)
+(add-hook 'c++-mode-common-hook 'doc-mode)
+
+;;source pair: ;
+;; auto load the related header file of cpp files
+(load-file "~/.emacs.d/cpp/sourcepair.el")
+(setq sourcepair-source-path '( "." "../*" ))
+(setq sourcepair-header-path '( "." "include" "../include" "../*"))
+(setq sourcepair-recurse-ignore '( ".svn" "Obj" "Debug" "Release" ))
+(add-hook 'c++-mode-hook
+          '(lambda()
+             (define-key c++-mode-map "\C-x\C-g" 'sourcepair-load)
+             ))
+
+(define-key c++-mode-map [f7] 'compile)
+;;Svn support
+(require 'psvn)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Tools;;;;;;;;;;;;;;;;;;;
+;; ibuffer support
+(require 'ibuffer)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
+
+;;;;;;;;;www.org-mode.org;;;;;;;;;;;;;;;;;;;;[==========Org-Mode===========]
+;; set the path of org-mode
+(setq load-path (cons "~/.emacs.d/org-mode/lisp" load-path))
+(require 'org-install)
+;;active it when the file extention is .org
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+(setq org-log-done t)
+;; turn on font-lock-mode when it org mode
+;;either use bottom two methods
+;; (global-font-lock-mode 1)
+(add-hook 'org-mode-hook 'turn-on-font-lock)
+
+
+;;;;;;;;;;;;;;;;;;;;wiki-mode;;;;;;;;;;[===========Wiki-Mode===========]
+;;http://www.emacswiki.org/emacs/EmacsWiKiMode
+;; add the directory to your load path
+(autoload 'wikipedia-mode
+  "~/.emacs.d/wiki-mode/wikipedia-mode.el"
+  "Major mode for editing documents in Wikipedia markup." t)
+;;associate files
+(setq auto-mode-alist
+      (cons '("\\.wiki\\'" . wikipedia-mode) auto-mode-alist))
+;;auxilary longline minor mode
+(autoload 'longlines-mode
+  "longlines.el"
+  "Minor mode for automatically wrapping long lines." t)
+;;auxilary pabbrev mode
+;;(add-to-list 'load-path
+;;	     "~/.emacs.d/wiki-mode")
+;;(require 'pabbrev)
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Settings for Python;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ref: www.cnblogs.com/coderzh/archive/2009/12/26/emacspythonide.html
+(add-to-list 'load-path
+	     "~/.emacs.d/python")
+
+
+;;(require 'python-mode)
+;; 1. yassnipet is already installed
+;; 2. autocomplete is already installed
+;; 3. Rope and Ropemacs
+;; 3.1 Rope&pymacs ( install rope and then configure)
+(add-to-list 'load-path
+	     "~/.emacs.d/python/Pymacs")
+
+;;<<Pymacs>>
+(setenv "PYMACS_PYTHON" "python2.6")
+(require 'pymacs)
+(defvar pymacs-load-path "/usr/local/lib/python2.6/dist-packages/Pymacs/")
+
+(autoload 'pymacs-apply "pymacs")
+(autoload 'pymacs-call "pymacs")
+(autoload 'pymacs-eval "pymacs" nil t)
+(autoload 'pymacs-exec "pymacs" nil t)
+(autoload 'pymacs-load "pymacs" nil t)
+(eval-after-load "pymacs"
+  '(add-to-list 'pymacs-load-path "~/.emacs.d/python"))
+
+;;(pymacs-load "pycomplete")
+
+;; 3.2 install ropmacs ( and then configure as follows)
+(pymacs-load "ropemacs" "rope-")
+(setq ropemacs-enable-autoimport t)
+
+;;4 pycomplete
+;;4.1 install Python mode
+(setq auto-mode-alist (cons '("\\.py$" . python-mode) auto-mode-alist))
+(setq interpreter-mode-alist (cons '("python" . python-mode)
+                                   interpreter-mode-alist))
+(autoload 'python-mode "python-mode" "Python editing mode." t)
+
+;;4.2 note: copy pycomplete.py to PYTHONPATH (external operation)
+;; ( note: the above operation is not in emacs enviornment)
+
+;;5. add some common hooks for python
+(add-hook 'python-mode-hook '(lambda()
+                               (load "py-mode-ext")
+                               (load "pyp")
+                               (require 'pycomplete)
+                               (setq indent-tabs-mode nil)
+                               ;; ipython settings
+                               (setq ipython-command "/usr/bin/ipython")
+                               (require 'ipython)
+                               (define-key py-mode-map [f12] 'pyp)
+                               (define-key py-mode-map "\C-c\C-g" 'py-call-pdb)
+                               (define-key py-mode-map "\C-c\C-w" 'pychecker)
+                               ;;PEP8&Pylint for syntax real-time checking
+                               (autoload 'python-pep8 "python-pep8")
+                               (autoload 'pep8 "python-pep8")
+                               (autoload 'python-pylint "python-pylint")
+                               (autoload 'pylint "python-pylint")
+                               ;;[Flymake Mode for Emacs/Python: readl-time syntax checking
+                               ;;www.plope.org/Members/chrism/flymake-mode/view?searchterm=ide
+
+                               ;;code checking via flymake
+                               ;;set code checker here from "epylint", "pyflakes"
+                               ;;neuroimaging.scipy.org/site/doc/manual/html/devel/tools/tricked_out_emacs.html
+                               (setq pycodechecker "pyflakes")
+                               (when (load "flymake" t)
+                                 (defun flymake-pycodecheck-init ()
+                                   (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                                                      'flymake-create-temp-inplace))
+                                          (local-file (file-relative-name
+                                                       temp-file
+                                                       (file-name-directory buffer-file-name))))
+                                     (list pycodechecker (list local-file))))
+                                 (add-to-list 'flymake-allowed-file-name-masks
+                                              '("\\.py\\'" flymake-pycodecheck-init)))
+                               ;;add some keymaps for quickly switching between major-mode for python
+                               (local-set-key [f8] 'flymake-mode)
+                               (local-set-key [f9] 'python-mode)
+                               ))
+
+;; additional python emacs setting from
+;; http://enigmacurry.com/category/emacs/
+(require 'pythondev)
+
+
+;;;;;Graphviz mode;;;;;;;;;;;;;;
+(load-file graphviz-dot-mode.el)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
